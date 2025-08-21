@@ -1,0 +1,20 @@
+[
+  {
+    "title": "How to update payment method",
+    "body": "Step-by-step guide to update your card or PayPal.",
+    "tags": ["billing", "payments"],
+    "status": "published"
+  },
+  {
+    "title": "Troubleshooting 500 errors",
+    "body": "Common causes of HTTP 500 and how to resolve.",
+    "tags": ["tech", "errors"],
+    "status": "published"
+  },
+  {
+    "title": "Tracking your shipment",
+    "body": "How to track delivery and expected dates.",
+    "tags": ["shipping", "delivery"],
+    "status": "published"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Refund for double charge",
+    "description": "I was charged twice for order #1234",
+    "category": "other"
+  },
+  {
+    "title": "App shows 500 on login",
+    "description": "Stack trace mentions auth module",
+    "category": "other"
+  },
+  {
+    "title": "Where is my package?",
+    "description": "Shipment delayed 5 days",
+    "category": "other"
+  }
+]
