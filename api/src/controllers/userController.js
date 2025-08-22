@@ -9,6 +9,11 @@ export const createUser = async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
     const user = new User({ name, email, role, password_hash });
     await user.save();
     res.status(201).json(user);
@@ -42,11 +47,13 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { name, email, role, password_hash } = req.body;
+
     const updated = await User.findByIdAndUpdate(
       req.params.id,
       { name, email, role, password_hash },
       { new: true, runValidators: true } // ensures enum validation
     );
+
     if (!updated) return res.status(404).json({ error: "User not found" });
     res.json(updated);
   } catch (err) {

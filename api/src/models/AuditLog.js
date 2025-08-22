@@ -3,7 +3,11 @@ import mongoose from "mongoose";
 const auditLogSchema = new mongoose.Schema({
   ticketId: { type: mongoose.Schema.Types.ObjectId, ref: "Ticket" },
   traceId: { type: String },
-  actor: { type: String, enum: ["system", "agent", "user"], required: true },
+  actor: {
+    type: String,
+    enum: ["system", "agent", "user"],
+    required: true,
+  },
   action: {
     type: String,
     enum: [
@@ -17,7 +21,7 @@ const auditLogSchema = new mongoose.Schema({
     ],
     required: true,
   },
-  meta: { type: mongoose.Schema.Types.Mixed }, // store any JSON
+  meta: { type: mongoose.Schema.Types.Mixed }, // JSON bag
   timestamp: { type: Date, default: Date.now },
 });
 

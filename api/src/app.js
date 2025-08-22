@@ -1,28 +1,34 @@
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const { connectMongo } = require('./db');
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 
-const health = require('./routes/health');
-const auth = require('./routes/auth');
-const kb = require('./routes/kb');
+const authRoutes = require("./routes/auth");
+const ticketRoutes = require("./routes/tickets");
+const kbRoutes = require("./routes/kb");
+const auditRoutes = require("./routes/audit");
+const agentRoutes = require("./routes/agent");
+const configRoutes = require("./routes/config");
 
 const app = express();
+app.use(bodyParser.json());
 
-app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
-app.use(morgan('dev'));
+// API routes
+app.use("/api/auth", authRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/kb", kbRoutes);
+app.use("/api/audit", auditRoutes);
+app.use("/api/agent", agentRoutes);
+app.use("/api/config", configRoutes);
 
-connectMongo();
+mongoose
+  .connect("mongodb://localhost:27017/helpdesk", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error(err));
 
-app.use('/api/healthz', health);
-app.use('/api/auth', auth);
-app.use('/api/kb', kb);
+app.get("/", (req, res) => res.send("Helpdesk API running..."));
 
-// Global error handler (no stack traces to clients)
-app.use((err, req, res, next) => {
-  console.error('ERR:', err.message);
-  res.status(err.status || 500).json({ error: 'Something went wrong' });
-});
-
-module.exports = app;
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

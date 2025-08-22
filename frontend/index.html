@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Knowledge Base - Helpdesk</title>
+</head>
+<body>
+  <h2>Knowledge Base Articles</h2>
+  <div id="articles"></div>
+
+  <script>
+    const apiBase = "http://localhost:8080";
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("You must log in first.");
+      window.location.href = "login.html";
+    }
+
+    async function loadArticles() {
+      try {
+        const res = await fetch(`${apiBase}/articles`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to fetch articles");
+        const data = await res.json();
+        const list = data.map(a => `<li>${a.title} - ${a.content}</li>`).join("");
+        document.getElementById("articles").innerHTML = `<ul>${list}</ul>`;
+      } catch (err) {
+        document.getElementById("articles").innerText = err.message;
+      }
+    }
+
+    loadArticles();
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Knowledge Base - Helpdesk</title>
+</head>
+<body>
+  <h2>Knowledge Base</h2>
+  <div id="kbList"></div>
+
+  <h3>Add / Edit Entry</h3>
+  <form id="kbForm">
+    <input type="hidden" id="kbId">
+    Title: <input type="text" id="title"><br>
+    Content: <textarea id="content"></textarea><br>
+    <button type="submit">Save</button>
+  </form>
+
+  <script>
+    const apiBase = "http://localhost:8080";
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token) {
+      alert("Login required");
+      window.location.href = "login.html";
+    }
+
+    // Only allow admin
+    if (role !== "admin") {
+      document.body.innerHTML = "<h2>Access denied. Admins only.</h2>";
+    } else {
+      async function loadKB() {
+        const res = await fetch(`${apiBase}/kb`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const kbDiv = document.getElementById("kbList");
+        kbDiv.innerHTML = "";
+        data.forEach(entry => {
+          const div = document.createElement("div");
+          div.innerHTML = `<b>${entry.title}</b> - ${entry.content}
+            <button onclick="editKB('${entry.id}','${entry.title}','${entry.content}')">Edit</button>`;
+          kbDiv.appendChild(div);
+        });
+      }
+
+      document.getElementById("kbForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("kbId").value;
+        const method = id ? "PUT" : "POST";
+        const url = id ? `${apiBase}/kb/${id}` : `${apiBase}/kb`;
+
+        await fetch(url, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title: document.getElementById("title").value,
+            content: document.getElementById("content").value
+          })
+        });
+        document.getElementById("kbForm").reset();
+        loadKB();
+      });
+
+      window.editKB = (id, title, content) => {
+        document.getElementById("kbId").value = id;
+        document.getElementById("title").value = title;
+        document.getElementById("content").value = content;
+      };
+
+      loadKB();
+    }
+  </script>
+</body>
+</html>

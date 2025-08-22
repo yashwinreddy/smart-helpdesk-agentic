@@ -6,10 +6,13 @@ import articleRoutes from "./routes/articleRoutes.js";
 import agentSuggestionRoutes from "./routes/agentSuggestionRoutes.js";
 import auditLogRoutes from "./routes/auditLogRoutes.js";
 import configRoutes from "./routes/configRoutes.js";
+import cors from 'cors';
+
 
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // MongoDB connection
 mongoose

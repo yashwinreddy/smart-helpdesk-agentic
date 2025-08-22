@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket Detail - Helpdesk</title>
+</head>
+<body>
+  <!-- Minimal role-based menu -->
+  <nav id="menu"></nav>
+
+  <h2>Ticket Detail</h2>
+  <div id="ticketInfo"></div>
+
+  <h3>Conversation</h3>
+  <div id="conversation"></div>
+
+  <h3>Agent Suggestions</h3>
+  <div id="suggestions"></div>
+
+  <h3>Audit Timeline</h3>
+  <div id="audit"></div>
+
+  <form id="replyForm">
+    <textarea id="replyText" placeholder="Type your reply"></textarea><br>
+    <button type="submit">Send Reply</button>
+  </form>
+
+  <script>
+    const apiBase = "http://localhost:8080";
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Login required");
+      window.location.href = "login.html";
+    }
+
+    // Role-based menu
+    async function loadMenu() {
+      try {
+        const res = await fetch(`${apiBase}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const user = await res.json();
+        let html = `<a href="index.html">Home</a> | <a href="tickets.html">Tickets</a>`;
+        if (user.role === "admin") html += ' | <a href="kb_editor.html">KB Editor</a>';
+        document.getElementById("menu").innerHTML = html;
+      } catch {
+        document.getElementById("menu").innerHTML = '<a href="login.html">Login</a>';
+      }
+    }
+    loadMenu();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticketId = urlParams.get("id");
+
+    async function loadTicket() {
+      try {
+        const res = await fetch(`${apiBase}/tickets/${ticketId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to fetch ticket");
+
+        const ticket = await res.json();
+        document.getElementById("ticketInfo").innerHTML = `
+          <b>${ticket.title}</b><br>
+          Status: ${ticket.status}<br>
+          Created by: ${ticket.user}
+        `;
+
+        // Conversation
+        const convoDiv = document.getElementById("conversation");
+        convoDiv.innerHTML = "";
+        ticket.conversation.forEach(msg => {
+          const p = document.createElement("p");
+          p.innerHTML = `<b>${msg.sender}:</b> ${msg.text}`;
+          convoDiv.appendChild(p);
+        });
+
+        // Agent suggestions
+        const suggDiv = document.getElementById("suggestions");
+        suggDiv.innerHTML = "";
+        if (ticket.suggestions && ticket.suggestions.length > 0) {
+          ticket.suggestions.forEach(s => {
+            const li = document.createElement("li");
+            li.innerText = s;
+            suggDiv.appendChild(li);
+          });
+        } else {
+          suggDiv.innerText = "No suggestions";
+        }
+
+        // Audit log
+        const auditDiv = document.getElementById("audit");
+        auditDiv.innerHTML = "";
+        ticket.audit.forEach(entry => {
+          const p = document.createElement("p");
+          p.innerText = `${entry.timestamp} - ${entry.action}`;
+          auditDiv.appendChild(p);
+        });
+
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    document.getElementById("replyForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = document.getElementById("replyText").value;
+
+      const res = await fetch(`${apiBase}/tickets/${ticketId}/reply`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ text })
+      });
+
+      if (res.ok) {
+        document.getElementById("replyText").value = "";
+        loadTicket(); // refresh conversation
+      } else {
+        alert("Failed to send reply");
+      }
+    });
+
+    loadTicket();
+  </script>
+</body>
+</html>

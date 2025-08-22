@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tickets - Helpdesk</title>
+</head>
+<body>
+  <!-- Minimal role-based menu -->
+  <nav id="menu"></nav>
+
+  <h2>Tickets</h2>
+  <div id="ticketList"></div>
+
+  <script>
+    const apiBase = "http://localhost:8080";
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Login required");
+      window.location.href = "login.html";
+    }
+
+    // Role-based menu
+    async function loadMenu() {
+      try {
+        const res = await fetch(`${apiBase}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const user = await res.json();
+        let html = `<a href="index.html">Home</a> | <a href="tickets.html">Tickets</a>`;
+        if (user.role === "admin") html += ' | <a href="kb_editor.html">KB Editor</a>';
+        document.getElementById("menu").innerHTML = html;
+      } catch {
+        document.getElementById("menu").innerHTML = '<a href="login.html">Login</a>';
+      }
+    }
+    loadMenu();
+
+    async function loadTickets() {
+      try {
+        const res = await fetch(`${apiBase}/tickets`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to fetch tickets");
+        const tickets = await res.json();
+
+        const listDiv = document.getElementById("ticketList");
+        listDiv.innerHTML = "";
+
+        tickets.forEach(t => {
+          const p = document.createElement("p");
+          p.innerHTML = `<b>${t.title}</b> - Status: ${t.status} - <a href="ticketdetail.html?id=${t._id}">View</a>`;
+          listDiv.appendChild(p);
+        });
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    loadTickets();
+  </script>
+</body>
+</html>

@@ -1,7 +1,9 @@
 import AgentSuggestion from "./models/AgentSuggestion.js";
 import Ticket from "./models/tickets.js";
-import AuditLog from "./models/AuditLog.js";
+import AuditLogPkg from "./models/AuditLog.js";
 import { v4 as uuidv4 } from "uuid";
+
+const AuditLog = AuditLogPkg;
 
 // Simple deterministic classification
 export const classifyTicket = (text) => {
