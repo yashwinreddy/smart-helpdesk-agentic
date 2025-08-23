@@ -1,6 +1,6 @@
 # SmartHelpdesk
 
-An AI-powered helpdesk agent with ticketing and knowledge base support.
+An AI-powered helpdesk agent with ticketing and knowledge base support. (BACKEND)
 
 ## 🚀 Setup
 
